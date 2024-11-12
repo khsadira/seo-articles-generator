@@ -9,6 +9,8 @@ type Agent struct {
 	ID          string
 	APIKey      string
 	Temperature float64
+	Model       string
+	MaxToken    int
 }
 
 type Service struct {
