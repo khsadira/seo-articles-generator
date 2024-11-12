@@ -5,9 +5,9 @@ type PublisherRepository interface {
 }
 
 type ArticleRepository interface {
-	GenerateArticle(keyword string) (Article, error)
+	GenerateArticle(keyword, articlePrompt string) (Article, error)
 }
 
 type PruningRepository interface {
-	GetPrunedKeywords(keyword string) ([]string, error)
+	GetPrunedKeywords(keyword, pruningPromt string) ([]string, error)
 }

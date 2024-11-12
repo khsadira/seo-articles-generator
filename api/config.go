@@ -4,6 +4,7 @@ import "github.com/qantai/domain"
 
 type CMS struct {
 	ID     string `json:"ID"`
+	URL    string `json:"url"`
 	APIKey string `json:"apiKey,omitempty"`
 }
 
@@ -13,18 +14,19 @@ type Agent struct {
 }
 
 type ArticlesPublisherConfig struct {
-	PrunedKeywords []string `json:"prunedKeywords"`
-	Keywords       []string `json:"keywords"`
-	CMS            []CMS    `json:"cms"`
-	PruningAgent   Agent    `json:"pruningAgent"`
-	ArticleAgent   Agent    `json:"articleAgent"`
+	Keywords      []string `json:"keywords"`
+	CMS           []CMS    `json:"cms"`
+	PruningAgent  Agent    `json:"pruningAgent"`
+	PruningPrompt string   `json:"pruningPrompt"`
+	ArticleAgent  Agent    `json:"articleAgent"`
+	ArticlePrompt string   `json:"articlePrompt"`
 }
 
 type ArticlesPublisherKeywordsConfig struct {
-	Keywords     []string `json:"keywords"`
-	CMS          []CMS    `json:"cms"`
-	PruningAgent Agent    `json:"pruningAgent"`
-	ArticleAgent Agent    `json:"articleAgent"`
+	Keywords      []string `json:"keywords"`
+	CMS           []CMS    `json:"cms"`
+	ArticleAgent  Agent    `json:"articleAgent"`
+	ArticlePrompt string   `json:"articlePrompt"`
 }
 
 func toDomainCMS(cms []CMS) []domain.CMS {
@@ -32,6 +34,7 @@ func toDomainCMS(cms []CMS) []domain.CMS {
 	for _, cms := range cms {
 		domainCMS = append(domainCMS, domain.CMS{
 			ID:     cms.ID,
+			URL:    cms.URL,
 			APIKey: cms.APIKey,
 		})
 	}

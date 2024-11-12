@@ -37,13 +37,13 @@ func NewService(articleRepository ArticleRepository, publisherRepository Publish
 	}
 }
 
-func (s ServicePruning) PublishArticlesKeywords(cms []CMS, keywords []string) error {
-	prunedKeywords, err := getPrunedKeywords(keywords, s.pruningRepository)
+func (s ServicePruning) PublishArticlesKeywords(cms []CMS, keywords []string, articlePrompt, pruningPromt string) error {
+	prunedKeywords, err := getPrunedKeywords(keywords, pruningPromt, s.pruningRepository)
 	if err != nil {
 		return fmt.Errorf("error while generating pruned keyword: %w", err)
 	}
 
-	articles, err := getArticles(prunedKeywords, s.articleRepository)
+	articles, err := getArticles(prunedKeywords, articlePrompt, s.articleRepository)
 	if err != nil {
 		return fmt.Errorf("error while generating articles: %w", err)
 	}
@@ -53,11 +53,13 @@ func (s ServicePruning) PublishArticlesKeywords(cms []CMS, keywords []string) er
 	return nil
 }
 
-func (s Service) PublishArticlesPrunedKeywords(cms []CMS, keywords []string) error {
-	articles, err := getArticles(keywords, s.articleRepository)
+func (s Service) PublishArticlesPrunedKeywords(cms []CMS, keywords []string, articlePrompt string) error {
+	articles, err := getArticles(keywords, articlePrompt, s.articleRepository)
 	if err != nil {
 		return fmt.Errorf("error while generating articles: %w", err)
 	}
+
+	println("we there")
 
 	publishArticles(s.publisherRepository, cms, articles)
 

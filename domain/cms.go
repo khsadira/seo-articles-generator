@@ -2,9 +2,9 @@ package domain
 
 type CMS struct {
 	ID     string
+	URL    string
 	APIKey string
 }
-
 
 type ServicePublisher struct {
 	repository PublisherRepository

@@ -11,13 +11,14 @@ type Article struct {
 	Status  string
 }
 
-func (a Article) Print() {
+func (a Article) Print(cms CMS) {
 	println(
-		"________________________\n"+"TITRE:", a.Title+"\n"+"CONTENT:", a.Content+"\n"+"STATUS:", a.Status+"\n"+"________________________\n",
+		"________________________\n"+"CMS:", cms.ID+"_URL:"+cms.URL+"_APIKEY:"+cms.APIKey+"\n",
+		"TITRE:", a.Title+"\n"+"CONTENT:", a.Content+"\n"+"STATUS:", a.Status+"\n"+"________________________\n",
 	)
 }
 
-func getPrunedKeywords(keywords []string, pruningRepository PruningRepository) ([]string, error) {
+func getPrunedKeywords(keywords []string, pruningPromt string, pruningRepository PruningRepository) ([]string, error) {
 	prunedKeywords := make([]string, 0)
 	mu := sync.Mutex{}
 	wg := sync.WaitGroup{}
@@ -27,7 +28,7 @@ func getPrunedKeywords(keywords []string, pruningRepository PruningRepository) (
 		go func() {
 			defer wg.Done()
 
-			prunedKeywordsTmp, err := pruningRepository.GetPrunedKeywords(keyword)
+			prunedKeywordsTmp, err := pruningRepository.GetPrunedKeywords(keyword, pruningPromt)
 			if err != nil {
 				log.Printf("Error pruning keyword: %s", err.Error())
 				return
@@ -39,10 +40,12 @@ func getPrunedKeywords(keywords []string, pruningRepository PruningRepository) (
 		}()
 	}
 
+	wg.Wait()
+
 	return prunedKeywords, nil
 }
 
-func getArticles(keywords []string, articleRepository ArticleRepository) ([]Article, error) {
+func getArticles(keywords []string, articlePrompt string, articleRepository ArticleRepository) ([]Article, error) {
 	articles := make([]Article, len(keywords))
 
 	wg := sync.WaitGroup{}
@@ -53,7 +56,7 @@ func getArticles(keywords []string, articleRepository ArticleRepository) ([]Arti
 		go func() {
 			defer wg.Done()
 
-			article, err := articleRepository.GenerateArticle(keyword)
+			article, err := articleRepository.GenerateArticle(keyword, articlePrompt)
 			if err != nil {
 				log.Printf("Error generating article: %s", err.Error())
 				return

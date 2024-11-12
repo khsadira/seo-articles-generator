@@ -33,7 +33,6 @@ func getArticle(keyword string, agent string) (string, string, error) {
 
 const OPEN_AI_API_KEY = ""
 
-// Structure pour la requête à l'API OpenAI
 type OpenAIRequest struct {
 	Model       string    `json:"model"`
 	Messages    []Message `json:"messages"`
@@ -41,18 +40,15 @@ type OpenAIRequest struct {
 	MaxTokens   int       `json:"max_tokens,omitempty"`
 }
 
-// Structure pour les messages dans la requête
 type Message struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 
-// Structure pour la réponse de l'API OpenAI
 type OpenAIResponse struct {
 	Choices []Choice `json:"choices"`
 }
 
-// Structure pour les choix dans la réponse
 type Choice struct {
 	Message Message `json:"message"`
 }
@@ -60,7 +56,6 @@ type Choice struct {
 func getArticleFromOpenAI(keyword string) (string, string, error) {
 	prompt := fmt.Sprintf("genre un article SEO optimisé pour le keyword %s", keyword)
 
-	// Préparer la requête
 	requestBody := OpenAIRequest{
 		Model:       "gpt-3.5-turbo",
 		Messages:    []Message{{Role: "user", Content: prompt}},
@@ -80,7 +75,6 @@ func getArticleFromOpenAI(keyword string) (string, string, error) {
 	req.Header.Set("Authorization", "Bearer "+OPEN_AI_API_KEY)
 	req.Header.Set("Content-Type", "application/json")
 
-	// Envoyer la requête à l'API OpenAI
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -88,18 +82,15 @@ func getArticleFromOpenAI(keyword string) (string, string, error) {
 	}
 	defer resp.Body.Close()
 
-	// Lire la réponse
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", "", err
 	}
 
-	// Vérifier le statut de la réponse
 	if resp.StatusCode != http.StatusOK {
 		return "", "", fmt.Errorf("API error: %s", body)
 	}
 
-	// Décodez la réponse JSON
 	var openAIResponse OpenAIResponse
 	if err := json.Unmarshal(body, &openAIResponse); err != nil {
 		return "", "", err

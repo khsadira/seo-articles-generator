@@ -2,27 +2,30 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/qantai/domain"
 	"github.com/qantai/repository"
 )
 
-func HandlerPublishArticlesPrunedKeywords(w http.ResponseWriter, r *http.Request) {
-	var articlesPublisherKeywordsConfig ArticlesPublisherKeywordsConfig
+func HandlerPublishArticles(w http.ResponseWriter, r *http.Request) {
+	var articlesPublisherConfig ArticlesPublisherConfig
 
-	if err := json.NewDecoder(r.Body).Decode(&articlesPublisherKeywordsConfig); err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&articlesPublisherConfig); err != nil {
+		errMsg := fmt.Errorf("invalid request: %w", err).Error()
+		http.Error(w, errMsg, http.StatusBadRequest)
 		return
 	}
 
-	pruningRepo := repository.NewPruning(toDomainAgent(articlesPublisherKeywordsConfig.PruningAgent))
-	articleRepo := repository.NewArticle(toDomainAgent(articlesPublisherKeywordsConfig.ArticleAgent))
+	pruningRepo := repository.NewPruning(toDomainAgent(articlesPublisherConfig.PruningAgent))
+	articleRepo := repository.NewArticle(toDomainAgent(articlesPublisherConfig.ArticleAgent))
 	publisherRepo := repository.NewPublisher()
 	service := domain.NewServicePruning(pruningRepo, articleRepo, publisherRepo)
 
-	err := service.PublishArticlesKeywords(toDomainCMS(articlesPublisherKeywordsConfig.CMS), articlesPublisherKeywordsConfig.Keywords)
+	err := service.PublishArticlesKeywords(toDomainCMS(articlesPublisherConfig.CMS), articlesPublisherConfig.Keywords, articlesPublisherConfig.ArticlePrompt, articlesPublisherConfig.PruningPrompt)
 	if err != nil {
-		http.Error(w, "Error publishing articles", http.StatusInternalServerError)
+		errMsg := fmt.Errorf("error publishing articles: %w", err).Error()
+		http.Error(w, errMsg, http.StatusInternalServerError)
 	}
 }
