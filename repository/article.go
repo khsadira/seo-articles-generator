@@ -68,7 +68,7 @@ type OpenAiResponseContent struct {
 }
 
 func getArticleFromOpenAI(keyword string, articlePrompt string, agent domain.Agent) (string, string, error) {
-	prompt := fmt.Sprintf("renvoie moi sous format json {\"title\":\"{{titre_placeholder}}\",\"content\":\"{{content_placeHolder}}\"} la reponse pour le prompt suivant: %s", articlePrompt+keyword)
+	prompt := fmt.Sprintf("Ne me renvoie que le json sous format: {\"title\":\"{{titre_placeholder}}\",\"content\":\"{{content_placeHolder}}\"} la reponse pour le prompt suivant:: %s", articlePrompt+keyword)
 
 	requestBody := OpenAIRequest{
 		Model:       agent.Model,

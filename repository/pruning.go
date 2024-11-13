@@ -13,5 +13,5 @@ func NewPruning(agent domain.Agent) PruningRepository {
 }
 
 func (p PruningRepository) GetPrunedKeywords(keyword, pruningPromt string) ([]string, error) {
-	return []string{keyword + "_" + pruningPromt + "_" + p.agent.ID + "_" + p.agent.APIKey}, nil
+	return []string{keyword}, nil
 }

@@ -5,12 +5,16 @@ import "github.com/qantai/domain"
 type CMS struct {
 	ID     string `json:"ID"`
 	URL    string `json:"url"`
-	APIKey string `json:"apiKey,omitempty"`
+	User   string `json:"user"`
+	APIKey string `json:"apiKey"`
 }
 
 type Agent struct {
-	ID     string `json:"ID"`
-	APIKey string `json:"apiKey"`
+	ID          string  `json:"ID"`
+	APIKey      string  `json:"apiKey"`
+	Model       string  `json:"model"`
+	Temperature float64 `json:"temperature"`
+	MaxTokens   int     `json:"maxTokens"`
 }
 
 type ArticlesPublisherConfig struct {
@@ -22,7 +26,7 @@ type ArticlesPublisherConfig struct {
 	ArticlePrompt string   `json:"articlePrompt"`
 }
 
-type ArticlesPublisherKeywordsConfig struct {
+type ArticlesPublisherPrunedKeywordsConfig struct {
 	Keywords      []string `json:"keywords"`
 	CMS           []CMS    `json:"cms"`
 	ArticleAgent  Agent    `json:"articleAgent"`
@@ -35,6 +39,7 @@ func toDomainCMS(cms []CMS) []domain.CMS {
 		domainCMS = append(domainCMS, domain.CMS{
 			ID:     cms.ID,
 			URL:    cms.URL,
+			User:   cms.User,
 			APIKey: cms.APIKey,
 		})
 	}
@@ -44,7 +49,10 @@ func toDomainCMS(cms []CMS) []domain.CMS {
 
 func toDomainAgent(agent Agent) domain.Agent {
 	return domain.Agent{
-		ID:     agent.ID,
-		APIKey: agent.APIKey,
+		ID:          agent.ID,
+		APIKey:      agent.APIKey,
+		Model:       agent.Model,
+		Temperature: agent.Temperature,
+		MaxToken:    agent.MaxTokens,
 	}
 }

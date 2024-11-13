@@ -3,6 +3,7 @@ package domain
 type CMS struct {
 	ID     string
 	URL    string
+	User   string
 	APIKey string
 }
 

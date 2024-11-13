@@ -3,6 +3,7 @@ package domain
 import (
 	"fmt"
 	"log"
+	"sync"
 )
 
 type Agent struct {
@@ -61,16 +62,18 @@ func (s Service) PublishArticlesPrunedKeywords(cms []CMS, keywords []string, art
 		return fmt.Errorf("error while generating articles: %w", err)
 	}
 
-	println("we there")
-
 	publishArticles(s.publisherRepository, cms, articles)
 
 	return nil
 }
 
 func publishArticles(publisherRepository PublisherRepository, cms []CMS, articles []Article) {
+	wg := sync.WaitGroup{}
+
 	for _, cmsItem := range cms {
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			for _, article := range articles {
 				err := publisherRepository.PublishArticle(cmsItem, article)
 				if err != nil {
@@ -79,4 +82,6 @@ func publishArticles(publisherRepository PublisherRepository, cms []CMS, article
 			}
 		}()
 	}
+
+	wg.Wait()
 }

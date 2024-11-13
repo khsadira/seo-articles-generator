@@ -9,7 +9,7 @@ import (
 )
 
 func HandlerPublishArticlesPrunedKeywords(w http.ResponseWriter, r *http.Request) {
-	var articlesPublisherKeywordsConfig ArticlesPublisherKeywordsConfig
+	var articlesPublisherKeywordsConfig ArticlesPublisherPrunedKeywordsConfig
 
 	if err := json.NewDecoder(r.Body).Decode(&articlesPublisherKeywordsConfig); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
