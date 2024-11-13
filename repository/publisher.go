@@ -61,7 +61,7 @@ func publishArticleWP(article Article, url, user, pass string) error {
 
 	if resp.StatusCode != http.StatusCreated {
 		bodyBytes, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("echec de la publication de l'article. Code d'erreur: %d | %w", resp.StatusCode, string(bodyBytes))
+		return fmt.Errorf("echec de la publication de l'article. Code d'erreur: %d | %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	fmt.Println("Article publié avec succès!")

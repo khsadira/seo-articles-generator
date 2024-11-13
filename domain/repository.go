@@ -11,3 +11,7 @@ type ArticleRepository interface {
 type PruningRepository interface {
 	GetPrunedKeywords(keyword, pruningPromt string) ([]string, error)
 }
+
+type ImageRepository interface {
+	GenerateImage(keyword, imagePrompt string) (Image, error)
+}

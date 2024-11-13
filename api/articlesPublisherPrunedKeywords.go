@@ -17,10 +17,11 @@ func HandlerPublishArticlesPrunedKeywords(w http.ResponseWriter, r *http.Request
 	}
 
 	articleRepo := repository.NewArticle(toDomainAgent(articlesPublisherKeywordsConfig.ArticleAgent))
+	imageRepo := repository.NewImage(toDomainImageAgent(articlesPublisherKeywordsConfig.ImageAgent))
 	publisherRepo := repository.NewPublisher()
-	service := domain.NewService(articleRepo, publisherRepo)
+	service := domain.NewService(articleRepo, imageRepo, publisherRepo)
 
-	err := service.PublishArticlesPrunedKeywords(toDomainCMS(articlesPublisherKeywordsConfig.CMS), articlesPublisherKeywordsConfig.Keywords, articlesPublisherKeywordsConfig.ArticlePrompt)
+	err := service.PublishArticlesPrunedKeywords(toDomainCMS(articlesPublisherKeywordsConfig.CMS), articlesPublisherKeywordsConfig.Keywords, articlesPublisherKeywordsConfig.ArticlePrompt, articlesPublisherKeywordsConfig.ImagePrompt)
 	if err != nil {
 		http.Error(w, "Error publishing articles", http.StatusInternalServerError)
 	}

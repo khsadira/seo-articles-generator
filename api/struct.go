@@ -17,6 +17,14 @@ type Agent struct {
 	MaxTokens   int     `json:"maxTokens"`
 }
 
+type ImageAgent struct {
+	ID      string `json:"ID"`
+	APIKey  string `json:"apiKey"`
+	Size    string `json:"size"`
+	Quality string `json:"quality"`
+	N       int    `json:"n"`
+}
+
 type ArticlesPublisherConfig struct {
 	Keywords      []string `json:"keywords"`
 	CMS           []CMS    `json:"cms"`
@@ -27,10 +35,12 @@ type ArticlesPublisherConfig struct {
 }
 
 type ArticlesPublisherPrunedKeywordsConfig struct {
-	Keywords      []string `json:"keywords"`
-	CMS           []CMS    `json:"cms"`
-	ArticleAgent  Agent    `json:"articleAgent"`
-	ArticlePrompt string   `json:"articlePrompt"`
+	Keywords      []string   `json:"keywords"`
+	CMS           []CMS      `json:"cms"`
+	ArticleAgent  Agent      `json:"articleAgent"`
+	ArticlePrompt string     `json:"articlePrompt"`
+	ImageAgent    ImageAgent `json:"imageAgent"`
+	ImagePrompt   string     `json:"imagePrompt"`
 }
 
 func toDomainCMS(cms []CMS) []domain.CMS {
@@ -54,5 +64,15 @@ func toDomainAgent(agent Agent) domain.Agent {
 		Model:       agent.Model,
 		Temperature: agent.Temperature,
 		MaxToken:    agent.MaxTokens,
+	}
+}
+
+func toDomainImageAgent(agent ImageAgent) domain.ImageAgent {
+	return domain.ImageAgent{
+		ID:      agent.ID,
+		APIKey:  agent.APIKey,
+		Size:    agent.Size,
+		Quality: agent.Quality,
+		N:       agent.N,
 	}
 }
