@@ -11,8 +11,10 @@ func main() {
 	handlePublishArticles()
 	handlePublishArticlesPrunedKeywords()
 
-	log.Println("Starting server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := ":8080"
+
+	log.Println("Starting server on " + port)
+	log.Fatal(http.ListenAndServe(port, nil))
 }
 
 func handlePublishArticles() {

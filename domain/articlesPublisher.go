@@ -31,6 +31,7 @@ func NewServicePruning(pruningRepository PruningRepository, articleRepository Ar
 func NewService(articleRepository ArticleRepository, imageRepository ImageRepository, publisherRepository PublisherRepository) Service {
 	return Service{
 		articleRepository:   articleRepository,
+		imageRepository:     imageRepository,
 		publisherRepository: publisherRepository,
 	}
 }
@@ -57,7 +58,7 @@ func (s Service) PublishArticlesPrunedKeywords(cms []CMS, keywords []string, art
 		return fmt.Errorf("error while generating articles: %w", err)
 	}
 
-	updateArticlesPlaceHolder(&articles, imagePromt, s.imageRepository)
+	updateArticlesPlaceHolder(articles, imagePromt, s.imageRepository)
 
 	publishArticles(s.publisherRepository, cms, articles)
 
@@ -83,13 +84,13 @@ func publishArticles(publisherRepository PublisherRepository, cms []CMS, article
 	wg.Wait()
 }
 
-func updateArticlesPlaceHolder(articles *[]Article, imagePrompt string, imageRepository ImageRepository) {
+func updateArticlesPlaceHolder(articles []Article, imagePrompt string, imageRepository ImageRepository) []Article {
 	images := make([]Image, 0)
 
 	wg := sync.WaitGroup{}
 	mu := sync.Mutex{}
 
-	for _, article := range *articles {
+	for _, article := range articles {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -117,28 +118,28 @@ func updateArticlesPlaceHolder(articles *[]Article, imagePrompt string, imageRep
 
 	wg.Wait()
 
-	insertPlaceHolders(articles, images)
+	return insertPlaceHolders(articles, images)
 }
 
-func insertPlaceHolders(articles *[]Article, images []Image) {
-	for i, article := range *articles {
+func insertPlaceHolders(articles []Article, images []Image) []Article {
+	for i, article := range articles {
 		for _, image := range images {
 			article.Content = strings.ReplaceAll(article.Content, "{{"+image.ID+"_imageUrlPlaceHolder}}", image.URL)
 		}
-		(*articles)[i] = article
+		articles[i] = article
 	}
+
+	return articles
 }
 
 func findPlaceHolders(str string) []PlaceHolder {
-	re := regexp.MustCompile(`{{(.*?)_(.*?)PlaceHolder}}`)
+	re := regexp.MustCompile(`{{(.*?)_(.*?)UrlPlaceHolder}}`)
 	matches := re.FindAllStringSubmatch(str, -1)
 	var placeholders []PlaceHolder
 
 	for _, match := range matches {
-		id := match[1]
-
 		placeholders = append(placeholders, PlaceHolder{
-			ID:   id,
+			ID:   match[1],
 			Type: getPlaceHolerType(match[2]),
 		})
 	}

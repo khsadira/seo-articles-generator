@@ -37,6 +37,6 @@ func getImage(keyword string, imagePrompt string, imageAgent domain.ImageAgent) 
 func getImageFromOpenAI(keyword, _ string, _ domain.ImageAgent) (domain.Image, error) {
 	return domain.Image{
 		ID:  keyword,
-		URL: "https://cdn.discordapp.com/attachments/797558850076934144/1247677846898610256/image.png?ex=6735d04b&is=67347ecb&hm=fd3025b4fa6050cc3e4f0e0d65add9518adf6689bb47403fdfbebcb502c43e16&",
+		URL: "http://fakeimg.pl/250x100",
 	}, nil
 }
