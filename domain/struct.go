@@ -14,6 +14,7 @@ type Agent struct {
 
 type ImageAgent struct {
 	ID      string
+	Model   string
 	APIKey  string
 	Size    string
 	Quality string

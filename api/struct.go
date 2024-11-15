@@ -20,6 +20,7 @@ type Agent struct {
 type ImageAgent struct {
 	ID      string `json:"ID"`
 	APIKey  string `json:"apiKey"`
+	Model   string `json:"model"`
 	Size    string `json:"size"`
 	Quality string `json:"quality"`
 	N       int    `json:"n"`
@@ -70,6 +71,7 @@ func toDomainAgent(agent Agent) domain.Agent {
 func toDomainImageAgent(agent ImageAgent) domain.ImageAgent {
 	return domain.ImageAgent{
 		ID:      agent.ID,
+		Model:   agent.Model,
 		APIKey:  agent.APIKey,
 		Size:    agent.Size,
 		Quality: agent.Quality,
