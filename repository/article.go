@@ -20,7 +20,7 @@ func NewArticle(agent domain.Agent) ArticleRepository {
 	}
 }
 
-func (a ArticleRepository) GenerateArticle(keyword, articlePrompt string) (domain.Article, error) {
+func (a ArticleRepository) GenerateArticle(keyword, articlePrompt string, images []domain.Image) (domain.Article, error) {
 	title, content, err := getArticle(keyword, articlePrompt, a.agent)
 	if err != nil {
 		return domain.Article{}, fmt.Errorf("erreur lors de la récupération de l'article : %v", err)
@@ -37,34 +37,15 @@ func getArticle(keyword string, articlePrompt string, agent domain.Agent) (strin
 	switch agent.ID {
 	case "openAI":
 		return getArticleFromOpenAI(keyword, articlePrompt, agent)
+	case "mock":
+		return getMockArticle(keyword)
 	default:
 		return "", "", fmt.Errorf("agent non supporté : %s", agent.ID)
 	}
 }
 
-type OpenAIRequest struct {
-	Model       string    `json:"model"`
-	Messages    []Message `json:"messages"`
-	Temperature float64   `json:"temperature,omitempty"`
-	MaxTokens   int       `json:"max_tokens,omitempty"`
-}
-
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-type OpenAIResponse struct {
-	Choices []Choice `json:"choices"`
-}
-
-type Choice struct {
-	Message Message `json:"message"`
-}
-
-type OpenAiResponseContent struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
+func getMockArticle(keyword string) (string, string, error) {
+	return "titre de l'article " + keyword, "contenu de l'article: <img src=\"{{" + keyword + "_imageUrlPlaceHolder}}\"/>", nil
 }
 
 func getArticleFromOpenAI(keyword string, articlePrompt string, agent domain.Agent) (string, string, error) {
@@ -123,4 +104,29 @@ func getArticleFromOpenAI(keyword string, articlePrompt string, agent domain.Age
 	articleContent := contentResp.Content
 
 	return articleTitle, articleContent, nil
+}
+
+type OpenAIRequest struct {
+	Model       string    `json:"model"`
+	Messages    []Message `json:"messages"`
+	Temperature float64   `json:"temperature,omitempty"`
+	MaxTokens   int       `json:"max_tokens,omitempty"`
+}
+
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type OpenAIResponse struct {
+	Choices []Choice `json:"choices"`
+}
+
+type Choice struct {
+	Message Message `json:"message"`
+}
+
+type OpenAiResponseContent struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }

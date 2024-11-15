@@ -17,6 +17,7 @@ type Service struct {
 type ServicePruning struct {
 	pruningRepository   PruningRepository
 	articleRepository   ArticleRepository
+	imageRepository     ImageRepository
 	publisherRepository PublisherRepository
 }
 
@@ -42,7 +43,7 @@ func (s ServicePruning) PublishArticlesKeywords(cms []CMS, keywords []string, ar
 		return fmt.Errorf("error while generating pruned keyword: %w", err)
 	}
 
-	articles, err := getArticles(prunedKeywords, articlePrompt, s.articleRepository)
+	articles, err := getArticles(cms, prunedKeywords, articlePrompt, s.articleRepository, s.imageRepository, s.publisherRepository)
 	if err != nil {
 		return fmt.Errorf("error while generating articles: %w", err)
 	}
@@ -53,7 +54,7 @@ func (s ServicePruning) PublishArticlesKeywords(cms []CMS, keywords []string, ar
 }
 
 func (s Service) PublishArticlesPrunedKeywords(cms []CMS, keywords []string, articlePrompt, imagePromt string) error {
-	articles, err := getArticles(keywords, articlePrompt, s.articleRepository)
+	articles, err := getArticles(cms, keywords, articlePrompt, s.articleRepository, s.imageRepository, s.publisherRepository)
 	if err != nil {
 		return fmt.Errorf("error while generating articles: %w", err)
 	}
@@ -102,14 +103,14 @@ func updateArticlesPlaceHolder(articles []Article, imagePrompt string, imageRepo
 					continue
 				}
 
-				image, err := imageRepository.GenerateImage(placeHolder.ID, imagePrompt)
+				generatedImages, err := imageRepository.GenerateImages(placeHolder.ID, imagePrompt, 1)
 				if err != nil {
 					fmt.Printf("error generating image: %s", err.Error())
 					continue
 				}
 
 				mu.Lock()
-				images = append(images, image)
+				images = append(images, generatedImages[0])
 				mu.Unlock()
 			}
 

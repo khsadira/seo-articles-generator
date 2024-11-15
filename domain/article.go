@@ -6,9 +6,10 @@ import (
 )
 
 type Article struct {
-	Title   string
-	Content string
-	Status  string
+	Title         string
+	Content       string
+	Status        string
+	FeaturedMedia float64
 }
 
 func (a Article) Print(cms CMS) {
@@ -45,7 +46,7 @@ func getPrunedKeywords(keywords []string, pruningPromt string, pruningRepository
 	return prunedKeywords, nil
 }
 
-func getArticles(keywords []string, articlePrompt string, articleRepository ArticleRepository) ([]Article, error) {
+func getArticles(cms []CMS, keywords []string, articlePrompt string, articleRepository ArticleRepository, imageRepository ImageRepository, publisherRepository PublisherRepository) ([]Article, error) {
 	articles := make([]Article, len(keywords))
 
 	wg := sync.WaitGroup{}
@@ -56,11 +57,26 @@ func getArticles(keywords []string, articlePrompt string, articleRepository Arti
 		go func() {
 			defer wg.Done()
 
-			article, err := articleRepository.GenerateArticle(keyword, articlePrompt)
+			images, err := imageRepository.GenerateImages(keyword, articlePrompt, 2)
+			if err != nil {
+				log.Printf("Error generating images: %s", err.Error())
+				return
+			}
+
+			uploadedImages, err := uploadImages(cms, images, publisherRepository)
+			if err != nil || len(uploadedImages) == 0 {
+				log.Printf("Error uploading images: %s", err.Error())
+				return
+			}
+
+			article, err := articleRepository.GenerateArticle(keyword, articlePrompt, nil)
 			if err != nil {
 				log.Printf("Error generating article: %s", err.Error())
 				return
 			}
+
+			article.Status = "draft"
+			article.FeaturedMedia = uploadedImages[0].FeaturedMedia
 
 			articles[i] = article
 		}()
@@ -69,4 +85,23 @@ func getArticles(keywords []string, articlePrompt string, articleRepository Arti
 	wg.Wait()
 
 	return articles, nil
+}
+
+func uploadImages(cms []CMS, images []Image, publisherRepository PublisherRepository) ([]UploadedImage, error) {
+	uploadedImages := make([]UploadedImage, 0)
+
+	for _, cmsItem := range cms {
+		for _, image := range images {
+			uploadedImage, err := publisherRepository.UploadImage(cmsItem, image)
+			if err != nil {
+				log.Printf("Error uploading images: %s", err.Error())
+				continue
+			}
+
+			uploadedImages = append(uploadedImages, uploadedImage)
+		}
+
+	}
+
+	return uploadedImages, nil
 }

@@ -2,10 +2,11 @@ package domain
 
 type PublisherRepository interface {
 	PublishArticle(cms CMS, article Article) error
+	UploadImage(cms CMS, images Image) (UploadedImage, error)
 }
 
 type ArticleRepository interface {
-	GenerateArticle(keyword, articlePrompt string) (Article, error)
+	GenerateArticle(keyword, articlePrompt string, images []Image) (Article, error)
 }
 
 type PruningRepository interface {
@@ -13,5 +14,5 @@ type PruningRepository interface {
 }
 
 type ImageRepository interface {
-	GenerateImage(keyword, imagePrompt string) (Image, error)
+	GenerateImages(keyword, imagePrompt string, quantity int) ([]Image, error)
 }
