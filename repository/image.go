@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/qantai/domain"
 )
@@ -22,11 +23,30 @@ func NewImage(agent domain.ImageAgent) ImageRepository {
 }
 
 func (i ImageRepository) GenerateImages(keyword, imagePrompt string, quantity int) ([]domain.Image, error) {
-	i.agent.N = quantity
-	images, err := getImages(keyword, imagePrompt, i.agent)
-	if err != nil {
-		return nil, fmt.Errorf("erreur lors de la récupération de l'image : %v", err)
+	images := make([]domain.Image, 0, quantity)
+
+	wg := sync.WaitGroup{}
+	mu := sync.Mutex{}
+
+	i.agent.N = 1
+	for j := 0; j < quantity; j++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			generatedImages, err := getImages(keyword, imagePrompt, i.agent)
+			if err != nil || len(generatedImages) == 0 {
+				log.Printf("erreur lors de la récupération de l'image : %v", err)
+				return
+			}
+
+			mu.Lock()
+			images = append(images, generatedImages...)
+			mu.Unlock()
+		}()
 	}
+
+	wg.Wait()
 
 	return images, nil
 }

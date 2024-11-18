@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/qantai/domain"
 )
@@ -51,14 +52,7 @@ func getMockArticle(keyword string) (string, string, error) {
 func getArticleFromOpenAI(keyword string, articlePrompt string, agent domain.Agent) (string, string, error) {
 	prompt := fmt.Sprintf("Ne me renvoie que le json sous format: {\"title\":\"{{titre_placeholder}}\",\"content\":\"{{content_placeHolder}}\"} la reponse pour le prompt suivant:: %s", articlePrompt+keyword)
 
-	requestBody := OpenAIRequest{
-		Model:       agent.Model,
-		Messages:    []Message{{Role: "user", Content: prompt}},
-		Temperature: agent.Temperature,
-		MaxTokens:   agent.MaxToken,
-	}
-
-	jsonData, err := json.Marshal(requestBody)
+	jsonData, err := json.Marshal(getArticleFromOpenAIRequestBody(agent, prompt))
 	if err != nil {
 		return "", "", err
 	}
@@ -91,8 +85,19 @@ func getArticleFromOpenAI(keyword string, articlePrompt string, agent domain.Age
 		return "", "", err
 	}
 
+	text := openAIResponse.Choices[0].Message.Content
+	start := strings.Index(text, "{")
+	end := strings.LastIndex(text, "}")
+
+	if start != -1 && end != -1 && start < end {
+		text = text[start : end+1]
+	} else {
+		text = strings.TrimPrefix(text, "```json\n")
+		text = strings.TrimSuffix(text, "```")
+	}
+
 	var contentResp OpenAiResponseContent
-	if err := json.Unmarshal([]byte(openAIResponse.Choices[0].Message.Content), &contentResp); err != nil {
+	if err := json.Unmarshal([]byte(text), &contentResp); err != nil {
 		return "", "", err
 	}
 
@@ -104,6 +109,30 @@ func getArticleFromOpenAI(keyword string, articlePrompt string, agent domain.Age
 	articleContent := contentResp.Content
 
 	return articleTitle, articleContent, nil
+}
+
+func getArticleFromOpenAIRequestBody(agent domain.Agent, prompt string) any {
+	switch agent.Model {
+	case "o1-mini":
+		return OpenAIRequestO1Mini{
+			Model:     agent.Model,
+			Messages:  []Message{{Role: "user", Content: prompt}},
+			MaxTokens: agent.MaxToken,
+		}
+	default:
+		return OpenAIRequest{
+			Model:       agent.Model,
+			Messages:    []Message{{Role: "user", Content: prompt}},
+			Temperature: agent.Temperature,
+			MaxTokens:   agent.MaxToken,
+		}
+	}
+}
+
+type OpenAIRequestO1Mini struct {
+	Model     string    `json:"model"`
+	Messages  []Message `json:"messages"`
+	MaxTokens int       `json:"max_completion_tokens,omitempty"`
 }
 
 type OpenAIRequest struct {
