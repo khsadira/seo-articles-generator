@@ -87,7 +87,6 @@ func toArticle(article domain.Article) Article {
 }
 
 func (p Publisher) UploadImage(cms domain.CMS, image domain.Image) (domain.UploadedImage, error) {
-
 	switch cms.ID {
 	case "wordpress":
 		return uploadImageWP(image, cms.URL, cms.User, cms.APIKey)
@@ -99,6 +98,7 @@ func (p Publisher) UploadImage(cms domain.CMS, image domain.Image) (domain.Uploa
 func convertImageAsBody(image domain.Image) (*bytes.Buffer, string, error) {
 	resp, err := http.Get(image.URL)
 	if err != nil {
+		println("FAILED:", image.ID, image.URL)
 		return nil, "", fmt.Errorf("failed to get image: %w", err)
 	}
 	defer resp.Body.Close()

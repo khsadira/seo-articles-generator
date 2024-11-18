@@ -102,17 +102,18 @@ func getImageFromOpenAI(keyword, prompt string, agent domain.ImageAgent) ([]doma
 
 	images := make([]domain.Image, len(data))
 
-	for _, item := range data {
+	for i, item := range data {
 		imageURL, ok := item.(map[string]interface{})["url"].(string)
 		if !ok {
 			log.Printf("failed to extract image URL")
 			continue
 		}
 
-		images = append(images, domain.Image{
+		images[i] = domain.Image{
 			URL: imageURL,
 			ID:  keyword,
-		})
+		}
+
 	}
 
 	return images, nil

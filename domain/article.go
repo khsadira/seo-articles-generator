@@ -1,7 +1,10 @@
 package domain
 
 import (
+	"fmt"
 	"log"
+	"regexp"
+	"strings"
 	"sync"
 )
 
@@ -46,7 +49,7 @@ func getPrunedKeywords(keywords []string, pruningPromt string, pruningRepository
 	return prunedKeywords, nil
 }
 
-func getArticles(cms []CMS, keywords []string, articlePrompt string, articleRepository ArticleRepository, imageRepository ImageRepository, publisherRepository PublisherRepository) ([]Article, error) {
+func getArticles(cms []CMS, keywords []string, articlePrompt, imagePrompt string, articleRepository ArticleRepository, imageRepository ImageRepository, publisherRepository PublisherRepository) ([]Article, error) {
 	articles := make([]Article, len(keywords))
 
 	wg := sync.WaitGroup{}
@@ -57,7 +60,7 @@ func getArticles(cms []CMS, keywords []string, articlePrompt string, articleRepo
 		go func() {
 			defer wg.Done()
 
-			images, err := imageRepository.GenerateImages(keyword, articlePrompt, 2)
+			images, err := imageRepository.GenerateImages(keyword, imagePrompt, 2)
 			if err != nil {
 				log.Printf("Error generating images: %s", err.Error())
 				return
@@ -73,6 +76,12 @@ func getArticles(cms []CMS, keywords []string, articlePrompt string, articleRepo
 			if err != nil {
 				log.Printf("Error generating article: %s", err.Error())
 				return
+			}
+
+			articlesGenerated := updateArticlesPlaceHolder(cms, []Article{article}, imagePrompt, imageRepository, publisherRepository)
+
+			if len(articlesGenerated) > 0 {
+				article = articlesGenerated[0]
 			}
 
 			article.Status = "draft"
@@ -104,4 +113,95 @@ func uploadImages(cms []CMS, images []Image, publisherRepository PublisherReposi
 	}
 
 	return uploadedImages, nil
+}
+
+func updateArticlesPlaceHolder(cms []CMS, articles []Article, imagePrompt string, imageRepository ImageRepository, publisherRepository PublisherRepository) []Article {
+	images := make([]Image, 0)
+
+	wg := sync.WaitGroup{}
+	mu := sync.Mutex{}
+
+	for _, article := range articles {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			placeHolders := findPlaceHolders(article.Content)
+
+			for _, placeHolder := range placeHolders {
+				if checkExisting(images, placeHolder.ID) || placeHolder.Type != PlaceHolderTypeImage {
+					continue
+				}
+
+				generatedImages, err := imageRepository.GenerateImages(placeHolder.ID, imagePrompt, 1)
+				if err != nil {
+					fmt.Printf("error generating image: %s", err.Error())
+					continue
+				}
+
+				uploadedImages, err := uploadImages(cms, images, publisherRepository)
+				if err != nil {
+					fmt.Printf("error uploading image: %s", err.Error())
+					continue
+				}
+
+				if len(uploadedImages) > 0 {
+					generatedImages[0].URL = uploadedImages[0].URL
+				}
+
+				mu.Lock()
+				images = append(images, generatedImages[0])
+				mu.Unlock()
+			}
+
+		}()
+	}
+
+	wg.Wait()
+
+	return insertPlaceHolders(articles, images)
+}
+
+func insertPlaceHolders(articles []Article, images []Image) []Article {
+	for i, article := range articles {
+		for _, image := range images {
+			article.Content = strings.ReplaceAll(article.Content, "{{"+image.ID+"_imageUrlPlaceHolder}}", image.URL)
+		}
+		articles[i] = article
+	}
+
+	return articles
+}
+
+func findPlaceHolders(str string) []PlaceHolder {
+	re := regexp.MustCompile(`{{(.*?)_(.*?)UrlPlaceHolder}}`)
+	matches := re.FindAllStringSubmatch(str, -1)
+	var placeholders []PlaceHolder
+
+	for _, match := range matches {
+		placeholders = append(placeholders, PlaceHolder{
+			ID:   match[1],
+			Type: getPlaceHolerType(match[2]),
+		})
+	}
+
+	return placeholders
+}
+
+func getPlaceHolerType(placeHolderType string) int {
+	switch placeHolderType {
+	case "image":
+		return PlaceHolderTypeImage
+	default:
+		return -1
+	}
+}
+
+func checkExisting(images []Image, id string) bool {
+	for _, image := range images {
+		if image.ID == id {
+			return true
+		}
+	}
+	return false
 }
