@@ -16,7 +16,7 @@ import (
 	_ "image/jpeg" // Pour supporter le décodage JPEG
 	_ "image/png"  // Pour supporter le décodage PNG
 
-	"github.com/qantai/domain"
+	"github.com/qantae/domain"
 )
 
 type Article struct {

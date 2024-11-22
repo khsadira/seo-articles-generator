@@ -1,3 +1,3 @@
-module github.com/qantai
+module github.com/qantae
 
 go 1.22.6

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/qantai/domain"
-	"github.com/qantai/repository"
+	"github.com/qantae/domain"
+	"github.com/qantae/repository"
 )
 
 func HandlerPublishArticles(w http.ResponseWriter, r *http.Request) {

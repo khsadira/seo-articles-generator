@@ -1,6 +1,6 @@
 package api
 
-import "github.com/qantai/domain"
+import "github.com/qantae/domain"
 
 type CMS struct {
 	ID     string `json:"ID"`

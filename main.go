@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/qantai/api"
+	"github.com/qantae/api"
 )
 
 func main() {

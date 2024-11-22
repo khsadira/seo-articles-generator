@@ -60,7 +60,7 @@ func getArticles(cms []CMS, keywords []string, articlePrompt, imagePrompt string
 		go func() {
 			defer wg.Done()
 
-			images, err := imageRepository.GenerateImages(keyword, imagePrompt, 2)
+			images, err := imageRepository.GenerateImages(keyword, imagePrompt, 1)
 			if err != nil {
 				log.Printf("Error generating images: %s", err.Error())
 				return
@@ -68,7 +68,7 @@ func getArticles(cms []CMS, keywords []string, articlePrompt, imagePrompt string
 
 			uploadedImages, err := uploadImages(cms, images, publisherRepository)
 			if err != nil || len(uploadedImages) == 0 {
-				log.Printf("Error uploading images: %s", err.Error())
+				log.Printf("Error uploading images: %v", err)
 				return
 			}
 
