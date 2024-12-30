@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/qantae/domain"
+	"github.com/seo-articles-generator/domain"
 )
 
 type ArticleRepository struct {

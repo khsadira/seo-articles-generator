@@ -16,7 +16,7 @@ import (
 	_ "image/jpeg" // Pour supporter le décodage JPEG
 	_ "image/png"  // Pour supporter le décodage PNG
 
-	"github.com/qantae/domain"
+	"github.com/seo-articles-generator/domain"
 )
 
 type Article struct {
@@ -124,7 +124,7 @@ func convertImageAsBody(image domain.Image) (*bytes.Buffer, string, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	imageName := filepath.Base(image.URL) + ".png" // Ajoute l'extension PNG
+	imageName := filepath.Base(image.URL) + ".png"
 
 	part, err := writer.CreateFormFile("file", imageName)
 	if err != nil {

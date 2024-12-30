@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/qantae/domain"
+import "github.com/seo-articles-generator/domain"
 
 type PruningRepository struct {
 	agent domain.Agent

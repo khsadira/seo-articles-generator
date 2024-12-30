@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/qantae/domain"
+	"github.com/seo-articles-generator/domain"
 )
 
 type ImageRepository struct {

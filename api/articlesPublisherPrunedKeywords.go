@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/qantae/domain"
-	"github.com/qantae/repository"
+	"github.com/seo-articles-generator/domain"
+	"github.com/seo-articles-generator/repository"
 )
 
 func HandlerPublishArticlesPrunedKeywords(w http.ResponseWriter, r *http.Request) {
